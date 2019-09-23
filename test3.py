@@ -15,8 +15,12 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.connect((HOST, PORT))
 print('Client:', sock.getsockname())
 
-
-reply = sock.recv(BUF_SIZE)
-data = struct.unpack('!II', reply)
-print(data[0])
-print(data[1])
+while True:
+    # msg = input("Message: ").encode()
+    # sock.sendall(msg)
+    reply = sock.recv(1024)
+    sock.sendall(b'ACK')
+    if len(reply) > 0:
+        print(reply.decode('utf-8'))
+    
+    #print(data[1])

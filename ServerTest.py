@@ -16,13 +16,14 @@ connect.listen()
 print("Server is up")
 
 # Player Config
-totalRow = 10
+totalRow = 20
 totalCol = 20
 # initial position of player spawn
 x = 0
 y = 0
 
 playerID = 1    #player Identifier
+players = []
 
 # This Class is for assigning a player
 class Player:
@@ -50,19 +51,24 @@ def receivingData(con, player):
     player_ID = player.getPlayerID()
     while True:
         data = ReceivingData.receiveData(con)
+        #con.sendall(b'')
         serverLog(data, player_ID)
 
 
 # # This function is for sending data to client
-# def sendingData(connection, data):
-#     connection.sendall(data)
+def sendingData():
+    while True:
+        data = struct.pack('!II', 4, 5)
+        for i in range(0, len(players)):
+            players[i].getPlayerConnection().sendall(data)
 
 
 ## This functiong is for initiating a player
 def playerInitiate(con, playerID):
     player = Player(con, playerID)
-    initBoardSize(con)
-    receivingData(con, player)
+    players.append(player)
+    #initBoardSize(con)
+    #receivingData(con, player)
 
 
 # This function is for displaying who connected to the server
@@ -78,5 +84,7 @@ while True:
         print("Player " + str(playerID) + " connected! IP address and source PORT: " , con.getpeername())
         threading.Thread(target=playerInitiate, args=(con, playerID)).start()
         playerID = playerID + 1
+    #sendingData()
+    print("Sending called")
     #data = con.recv(1024)
     

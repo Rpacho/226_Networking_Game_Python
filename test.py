@@ -4,6 +4,7 @@ import curses
 import socket
 import struct
 import ReceivingData
+import threading
 
 BUF_SIZE = 1024
 HOST = '127.0.0.1'
@@ -39,11 +40,25 @@ def display(character, posY, posX, screen):
 def sendData(posY, posX):
     data = struct.pack('!II', posY, posX)
     sock.sendall(data)
+data2 = b''
+# def dataRecieve():
+#     data = sock.recv(1024)
+#     data2 = data
+#     if data != b'':
+#         unpack = struct.unpack('!II', data)
+#         posX = unpack[0]
+#         posY = unpack[1]
+
+#threading.Thread(target=dataRecieve).start()
+
+
 def main(stdscr):
 
-    data = ReceivingData.receiveData(sock)
-    row = data[0]
-    col = data[1]
+    # data = ReceivingData.receiveData(sock)
+    # row = data[0]
+    # col = data[1]
+    row = 10
+    col = 20
     playerPosY = 0
     playerPosX = 0
     player = playerIcon
@@ -62,8 +77,11 @@ def main(stdscr):
 
     while True:
         key = stdscr.getch()
-        # stdscr.clear()
+        #i = dataRecieve()
+        #stdscr.clear()
+        #stdscr.addstr(i[0], 0, "Y")
         if key == curses.KEY_UP:
+            #display("T", posY, posX, stdscr)
             display(emptyBlock, playerPosY, playerPosX, stdscr)
             playerPosY = playerPosY - 1
             display(player, playerPosY, playerPosX, stdscr)
@@ -84,6 +102,7 @@ def main(stdscr):
             display(player, playerPosY, playerPosX, stdscr)
             sendData(playerPosY, playerPosX)
         stdscr.refresh()
+
 
 curses.wrapper(main)
 

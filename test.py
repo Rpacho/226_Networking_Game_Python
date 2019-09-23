@@ -5,10 +5,12 @@ import socket
 import struct
 import ReceivingData
 import threading
+from Player import MakePlayer
 
 BUF_SIZE = 1024
-HOST = '127.0.0.1'
+HOST = '192.168.1.77'
 PORT = 12345
+players = []
 
 # error check if no argument given
 
@@ -37,26 +39,32 @@ emptyBlock = "_"
 def display(character, posY, posX, screen):
     screen.addstr(posY, posX, character)
 
+
 def sendData(posY, posX):
     data = struct.pack('!II', posY, posX)
     sock.sendall(data)
 data2 = b''
-# def dataRecieve():
-#     data = sock.recv(1024)
-#     data2 = data
-#     if data != b'':
-#         unpack = struct.unpack('!II', data)
-#         posX = unpack[0]
-#         posY = unpack[1]
 
-#threading.Thread(target=dataRecieve).start()
-
+def dataRecieve():
+    data = sock.recv(1024)
+    sock.sendall(b'Ack')
+    playerAlreadyExist = False
+    if data != b'Ack':
+        unpackData = struct.unpack('!III', data)
+        for i in range(len(players)):
+            if players[i].getPlayerID() == unpackData[0]:
+                return i
+        if playerAlreadyExist == False:
+            players.append(MakePlayer(unpackData[0], unpackData[1], unpackData[2]))
+    return playerAlreadyExist
 
 def main(stdscr):
 
-    # data = ReceivingData.receiveData(sock)
-    # row = data[0]
-    # col = data[1]
+    # boardInitData = sock.recv(1024)
+    # unpackBoardInitData = struct.unpack('!II', boardInitData)
+    # sock.sendall(b'Ack')
+    # row = unpackBoardInitData[0]
+    # col = unpackBoardInitData[1]
     row = 10
     col = 20
     playerPosY = 0
@@ -73,11 +81,10 @@ def main(stdscr):
                 stdscr.addstr(y,x, " ")
 
     #HardCoded initial position for player Y
-    stdscr.addstr(0, 0, player)
 
     while True:
         key = stdscr.getch()
-        #i = dataRecieve()
+        data = dataRecieve()
         #stdscr.clear()
         #stdscr.addstr(i[0], 0, "Y")
         if key == curses.KEY_UP:

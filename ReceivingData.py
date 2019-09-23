@@ -7,8 +7,10 @@ BUFF_SIZE = 1024
 
 def receiveData(connection):
     data = connection.recv(BUFF_SIZE)
-    unpackData = struct.unpack('!II', data)
-    return unpackData
+    if data != b'Ack':
+        unpackData = struct.unpack('!II', data)
+        return unpackData
+    return
     # dataReceive = []
     # while True:
     #     data = connection.recv(BUFF_SIZE)

@@ -2,7 +2,8 @@
 
 import socket
 import threading
-import curses
+import GameManager
+import struct
 
 HOST_IP = ''
 PORT = 12345
@@ -22,24 +23,29 @@ try:
 except:
     print("Cannnot establish connection. Server Down!")
 
+row = 10
+col = 20
+# GUI
+
+
 # Isolating the connection of the player by threading
 def thread_player(con, playerID):
     startMsg = "Welcome to the server"
     con.sendall(startMsg.encode())
     while True:
-        print("debug")
         try:
-            print("debug2")
-            data = con.recv((1024).decode())
-            print("debug3")
-            if not data:
-                break
+            data = con.recv(1024)
+            if data == '':
+                 break
             else:
-                print("Receiving: " , data)
-                print("Sending: ", data)
+                dataUnpack = struct.unpack(b'!BB', bytearray(data))
+                print("Receiving: " , dataUnpack)
+                print("Sending: ", dataUnpack)
+
                 con.sendall(data.encode())
 
-        except:
+        except Exception as e:
+            print(e)
             break
     print("Connection lost")
     con.close()

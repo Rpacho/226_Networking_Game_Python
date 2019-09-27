@@ -36,17 +36,17 @@ class Network():
             print(e)
 
 
-n = Network()
+# n = Network()
 # #print(n.sendData("Hello"))
 # data = struct.pack('!BBB', 2, 3, 0b0111)
 # data2 = n.sendData(data)
 # print(struct.unpack('!BBB', data2))
 #print(n.sendData(0b0111, 0, 0))
 
-FLAG_POSITION = 0b0011
-FLAG_BOARD_SIZE = 0b0111
-FLAG_BOARD_TREASURE = 0b1111
-FLAG_SPAWN_POINT = 0b0001
+# FLAG_POSITION = 0b0011
+# FLAG_BOARD_SIZE = 0b0111
+# FLAG_BOARD_TREASURE = 0b1111
+# FLAG_SPAWN_POINT = 0b0001
 # try:
 #         gameBoardSize = n.sendData(FLAG_BOARD_SIZE, 0, 0)
 #         print(gameBoardSize)

@@ -5,6 +5,7 @@ import socket
 import GameManager
 from GameNetwork import Network
 import struct
+import time
 
 playerIcon = "Y"
 row = 10
@@ -24,6 +25,7 @@ def main(stdscr):
     playerPosY = 0
     playerPosX = 0
     curses.curs_set(0)
+    #GameManager.DrawBoard(10, 20, stdscr)
     try:
         gameBoardSize = net.sendData(FLAG_BOARD_SIZE, 0, 0)
         spawnPosition = net.sendData(FLAG_SPAWN_POINT, 0, 0)
@@ -36,6 +38,7 @@ def main(stdscr):
         stdscr.refresh() #temp
     except Exception as e:
         print(e)
+    time.sleep(5)
 
 # Player Control
     #while True:

@@ -11,6 +11,8 @@ PORT = 12345
 # Player Config
 MAX_PLAYER = 4
 playerID = 0
+spawnPoint_1 = [0,0]
+spawnPoint_2 = [9,38]
 
 #Flag for transmiting data
 FLAG_POSITION = 0b0011
@@ -47,7 +49,7 @@ def transmitting(con, flag, dataY, dataX):
             dataToSend2 = struct.pack('!BBB', FLAG_BOARD_SIZE, row, col)
             con.sendall(dataToSend2)
         if(dataReceive[0] == FLAG_SPAWN_POINT):
-            dataToSend3 = struct.pack('!BBB', FLAG_SPAWN_POINT, 10, 40)
+            dataToSend3 = struct.pack('!BBB', FLAG_SPAWN_POINT, spawnPoint_2[0], spawnPoint_2[1])
             con.sendall(dataToSend3)
         #con.sendall(b'')
     except Exception as e:

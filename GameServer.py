@@ -12,6 +12,12 @@ PORT = 12345
 MAX_PLAYER = 4
 playerID = 0
 
+#Flag for transmiting data
+FLAG_POSITION = 0b0011
+FLAG_BOARD_SIZE = 0b0111
+FLAG_BOARD_TREASURE = 0b1111
+FLAG_SPAWN_POINT = 0b0001
+
 connect = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Connect to the network
@@ -27,6 +33,26 @@ row = 10
 col = 20
 # GUI
 
+## This function is for receiving and sending data
+def transmitting(con, flag, dataY, dataX):
+    try:
+        data = con.recv(1024)
+        print(len(data))
+        if not data:
+            return False
+        dataToSend = struct.pack('!BBB', flag, dataY, dataX)    # For Sending position of player
+        dataReceive = struct.unpack('!BBB', data)
+        print(dataReceive)
+        if(dataReceive[0] == FLAG_BOARD_SIZE):
+            dataToSend2 = struct.pack('!BBB', FLAG_BOARD_SIZE, row, col)
+            con.sendall(dataToSend2)
+        if(dataReceive[0] == FLAG_SPAWN_POINT):
+            dataToSend3 = struct.pack('!BBB', FLAG_SPAWN_POINT, 10, 40)
+            con.sendall(dataToSend3)
+        #con.sendall(b'')
+    except Exception as e:
+        print(e)
+
 
 # Isolating the connection of the player by threading
 def thread_player(con, playerID):
@@ -34,15 +60,8 @@ def thread_player(con, playerID):
     con.sendall(startMsg.encode())
     while True:
         try:
-            data = con.recv(1024)
-            if data == '':
-                 break
-            else:
-                dataUnpack = struct.unpack(b'!BB', bytearray(data))
-                print("Receiving: " , dataUnpack)
-                print("Sending: ", dataUnpack)
-
-                con.sendall(data.encode())
+            if((transmitting(con, FLAG_POSITION, 1, 1)) == False):
+                break
 
         except Exception as e:
             print(e)

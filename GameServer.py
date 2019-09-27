@@ -41,16 +41,18 @@ def transmitting(con, flag, dataY, dataX):
         data = con.recv(1024)
         print(len(data))
         if not data:
-            return False
-        dataToSend = struct.pack('!BBB', flag, dataY, dataX)    # For Sending position of player
-        dataReceive = struct.unpack('!BBB', data)
-        print(dataReceive)
+            return False   
+        dataReceive = struct.unpack('!Bbb', data)
         if(dataReceive[0] == FLAG_BOARD_SIZE):
-            dataToSend2 = struct.pack('!BBB', FLAG_BOARD_SIZE, row, col)
+            dataToSend2 = struct.pack('!Bbb', FLAG_BOARD_SIZE, row, col)
             con.sendall(dataToSend2)
         if(dataReceive[0] == FLAG_SPAWN_POINT):
-            dataToSend3 = struct.pack('!BBB', FLAG_SPAWN_POINT, spawnPoint_2[0], spawnPoint_2[1])
+            dataToSend3 = struct.pack('!Bbb', FLAG_SPAWN_POINT, spawnPoint_2[0], spawnPoint_2[1])
             con.sendall(dataToSend3)
+        if(dataReceive[0] == FLAG_POSITION):
+            dataToSend = struct.pack('!Bbb', FLAG_POSITION, dataReceive[1], dataReceive[2])
+            print("Player position at :", dataToSend[1], dataToSend[2])
+            con.sendall(dataToSend)
         #con.sendall(b'')
     except Exception as e:
         print(e)
@@ -60,9 +62,11 @@ def transmitting(con, flag, dataY, dataX):
 def thread_player(con, playerID):
     startMsg = "Welcome to the server"
     con.sendall(startMsg.encode())
+    positionY = spawnPoint_2[0]
+    positionX = spawnPoint_2[1]
     while True:
         try:
-            if((transmitting(con, FLAG_POSITION, 1, 1)) == False):
+            if((transmitting(con, FLAG_POSITION, positionY, positionX)) == False):
                 break
 
         except Exception as e:

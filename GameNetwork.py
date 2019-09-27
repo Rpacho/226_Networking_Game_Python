@@ -24,13 +24,13 @@ class Network():
     
     def sendData(self, flag, dataY, dataX):
         try:
-            data = struct.pack('!BBB', flag, dataY, dataX)
+            data = struct.pack('!Bbb', flag, dataY, dataX)
             self.con.sendall((data))
             reply = self.con.recv(1024)
-            print(reply)
+            #print(reply)
             if not reply:
                 return False
-            unpackReply = struct.unpack('!BBB', reply)
+            unpackReply = struct.unpack('!Bbb', reply)
             return unpackReply
         except socket.error as e:
             print(e)

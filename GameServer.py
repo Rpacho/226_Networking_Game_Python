@@ -4,13 +4,14 @@ import socket
 import threading
 import DrawGui
 import struct
+from GameManager import GameDataManager
 
 HOST_IP = ''
 PORT = 12345
 
 # Player Config
 MAX_PLAYER = 2
-playerID = 1
+playerID = 1 # We can also use this for getting the # of current players online
 spawnPoint_1 = [0,0]
 spawnPoint_2 = [9,38]
 
@@ -71,7 +72,7 @@ def transmitting(con, spawnPoint, thisPlayerID):
 
 
 # Isolating the connection of the player by threading
-def thread_player(con, extra):
+def thread_player(con, player):
     global playerID
     msg = "Welcome to server"
     print(msg, ' Player ', playerID)
@@ -81,21 +82,43 @@ def thread_player(con, extra):
     positionX = spawnPoint[1]
     thisPlayerID = playerID
     playerID += 1
+    if(player == 1):
+        gameManager.setPlayer1Ready(True)
+        print("Waiting for other players to get ready..")
+    elif(player == 2):
+        gameManager.setPlayer2Ready(True)
+        print("Players 2 are ready.. \n Game Starting...")
     while True:
+        gameManager.setReady() # sets if all players are ready
+        if gameManager.getReady() == False:
+            continue
         try:
+            # player 1 Transmmiting data
             if((transmitting(con, spawnPoint, thisPlayerID)) == False):
                 break
-
+            # player 2 Transmmiting data
+            if((transmitting(gameManager.getPlayerConnection2(), spawnPoint, thisPlayerID)) == False):
+                break
         except Exception as e:
             print(e)
             break
-    print("Connection lost")
+    print("Connection lost Player ", thisPlayerID)
     con.close()
 
 # Client connect to Server
 while True:
     con, socketname = connect.accept()
-    # Send player id
-    # start the game
-    extra = 1
-    threading.Thread(target=thread_player, args=(con, extra)).start()
+    gameID = 1
+    player = 0
+    global gameManager
+    if gameID == 1 and playerID == 1:   # Should always execute first when first player connects
+        gameManager = GameDataManager(con, gameID, playerID)
+        player = 1
+    elif(gameID == 1 and playerID == 2):
+        gameManager.setPlayer2Con(con)
+        gameManager.setNumPlayer(playerID)
+        gameID += 1
+        player = 2
+    # Temporary
+    
+    threading.Thread(target=thread_player, args=(con, player)).start()

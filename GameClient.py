@@ -39,9 +39,9 @@ def createPlayer(playerID, posY, posX):
 # def getUpdate():
 
 # This function return the player new id
-def getPlayerSetUp(playerUID):
+def getPlayerSetUp(playerUID, posY, posX):
     if(playerUID[0] == FLAG_CREATE_PLAYER):
-        playerIndex = createPlayer(playerUID[1], playerPosY, playerPosX)
+        playerIndex = createPlayer(playerUID[1], posY, posX)
         return playerIndex
     return False
 #This function is to receive the position of the
@@ -64,14 +64,16 @@ def main(stdscr):
     curses.curs_set(0)
     
     # Ask the server for player id
-    # playerUID = net.sendData(FLAG_CREATE_PLAYER, NO_DATA, NO_DATA)
+    playerUID = net.sendData(FLAG_CREATE_PLAYER, NO_DATA, NO_DATA)
     # Ask the server for the size of the board
     gameBoardSize = net.sendData(FLAG_BOARD_SIZE, NO_DATA, NO_DATA)
     # Ask the server for the spawn position of this player
     spawnPosition = net.sendData(FLAG_SPAWN_POINT, NO_DATA, NO_DATA)
+    # For other player data
+    otherPlayerUID = net.sendData(FLAG_CREATE_PLAYER, NO_DATA, NO_DATA)
+    otherSpawnPosition = net.sendData(FLAG_SPAWN_POINT, NO_DATA, NO_DATA)
     try:    # Validating that the data we receive is right
-        # To get player id
-        player_id = getPlayerSetUp(playerUID)
+        #### This Player ####
         # Draw the Board
         if(gameBoardSize[0] == FLAG_BOARD_SIZE):
             DrawGui.DrawBoard(gameBoardSize[1], gameBoardSize[2], stdscr)
@@ -79,16 +81,28 @@ def main(stdscr):
         if(spawnPosition[0] == FLAG_SPAWN_POINT):
             playerPosY = spawnPosition[1]
             playerPosX = spawnPosition[2]
+        # To get This player id
+        player_id = getPlayerSetUp(playerUID, playerPosY, playerPosX)
+        #### Other Player ####
+        # To get other player id
+        # Take other spawnPoint
+        if(otherSpawnPosition[0] == FLAG_SPAWN_POINT):
+            OtherPlayerPosY = otherSpawnPosition[1]
+            OtherPlayerPosX = otherSpawnPosition[2]
+        otherPlayer_id = getPlayerSetUp(otherPlayerUI, OtherPlayerPosY, OtherPlayerPosX)
     except:
         print("Error: Setting up the game client.. Failed!")
+
 
 
     # Create This(this object) player
     # playerIndex = createPlayer(player_id, playerPosY, playerPosX)
     # # Spawn the player
-    # updatePosition(stdscr,players[playerIndex])
-    # numPlayers += 1
-
+    updatePosition(stdscr, players[player_id])
+    numPlayers += 1
+    updatePosition(stdscr, players[otherPlayer_id])
+    numPlayers += 1
+    
     while True:
         # otherPlayer = net.sendData(FLAG_CREATE_PLAYER, NO_DATA, NO_DATA)
         # if(otherPlayer[1] > 1): # more than 1 player

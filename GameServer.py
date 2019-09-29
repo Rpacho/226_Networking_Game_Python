@@ -44,7 +44,7 @@ def getSpawnPoint():
 # GUI
 
 ## This function is for receiving and sending data
-def transmitting(con, flag, dataY, dataX):
+def transmitting(con, dataY, dataX):
     try:
         data = con.recv(1024)
         print(len(data))
@@ -79,7 +79,7 @@ def thread_player(con, playerID):
     positionX = spawnPoint[1]
     while True:
         try:
-            if((transmitting(con, FLAG_POSITION, positionY, positionX)) == False):
+            if((transmitting(con, positionY, positionX)) == False):
                 break
 
         except Exception as e:

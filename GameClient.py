@@ -53,17 +53,19 @@ def main(stdscr):
     gameBoardSize = net.sendData(FLAG_BOARD_SIZE, NO_DATA, NO_DATA)
     # Ask the server for the spawn position of this player
     spawnPosition = net.sendData(FLAG_SPAWN_POINT, NO_DATA, NO_DATA)
-
-    # Validating that the data we receive is right
-    if(playerUID[0] == FLAG_CREATE_PLAYER):
-        player_id = playerUID[1]
-    # Draw the Board
-    if(gameBoardSize[0] == FLAG_BOARD_SIZE):
-        DrawGui.DrawBoard(gameBoardSize[1], gameBoardSize[2], stdscr)
-    # Take the spawnPoint
-    if(spawnPosition[0] == FLAG_SPAWN_POINT):
-        playerPosY = spawnPosition[1]
-        playerPosX = spawnPosition[2]
+    try:
+        # Validating that the data we receive is right
+        if(playerUID[0] == FLAG_CREATE_PLAYER):
+            player_id = playerUID[1]
+        # Draw the Board
+        if(gameBoardSize[0] == FLAG_BOARD_SIZE):
+            DrawGui.DrawBoard(gameBoardSize[1], gameBoardSize[2], stdscr)
+        # Take the spawnPoint
+        if(spawnPosition[0] == FLAG_SPAWN_POINT):
+            playerPosY = spawnPosition[1]
+            playerPosX = spawnPosition[2]
+    except:
+        print("Error: Setting up the game client.. Failed!")
 
 
     # Create class for player

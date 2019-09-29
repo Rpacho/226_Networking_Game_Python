@@ -44,7 +44,7 @@ def getSpawnPoint():
 # GUI
 
 ## This function is for receiving and sending data
-def transmitting(con, dataY, dataX):
+def transmitting(con, spawnPoint, thisPlayerID):
     try:
         data = con.recv(1024)
         print(len(data))
@@ -52,14 +52,14 @@ def transmitting(con, dataY, dataX):
             return False   
         dataReceive = struct.unpack('!Bbb', data)
         if(dataReceive[0] == FLAG_CREATE_PLAYER):
-            playerData = struct.pack('!Bbb', FLAG_CREATE_PLAYER, playerID, NO_DATA) # 0 means no data
+            playerData = struct.pack('!Bbb', FLAG_CREATE_PLAYER, thisPlayerID, NO_DATA) # 0 means no data
             print(struct.unpack('!Bbb', playerData))
             con.sendall(playerData)
         if(dataReceive[0] == FLAG_BOARD_SIZE):
             dataToSend2 = struct.pack('!Bbb', FLAG_BOARD_SIZE, row, col)
             con.sendall(dataToSend2)
         if(dataReceive[0] == FLAG_SPAWN_POINT):
-            dataToSend3 = struct.pack('!Bbb', FLAG_SPAWN_POINT, spawnPoint_2[0], spawnPoint_2[1])
+            dataToSend3 = struct.pack('!Bbb', FLAG_SPAWN_POINT, spawnPoint[0], spawnPoint[1])
             con.sendall(dataToSend3)
         if(dataReceive[0] == FLAG_POSITION):
             dataToSend = struct.pack('!Bbb', FLAG_POSITION, dataReceive[1], dataReceive[2])
@@ -71,15 +71,19 @@ def transmitting(con, dataY, dataX):
 
 
 # Isolating the connection of the player by threading
-def thread_player(con, playerID):
+def thread_player(con, extra):
+    global playerID
     msg = "Welcome to server"
+    print(msg, ' Player ', playerID)
     con.sendall(msg.encode())
     spawnPoint = getSpawnPoint()
     positionY = spawnPoint[0]
     positionX = spawnPoint[1]
+    thisPlayerID = playerID
+    playerID += 1
     while True:
         try:
-            if((transmitting(con, positionY, positionX)) == False):
+            if((transmitting(con, spawnPoint, thisPlayerID)) == False):
                 break
 
         except Exception as e:
@@ -93,4 +97,5 @@ while True:
     con, socketname = connect.accept()
     # Send player id
     # start the game
-    threading.Thread(target=thread_player, args=(con, playerID)).start()
+    extra = 1
+    threading.Thread(target=thread_player, args=(con, extra)).start()

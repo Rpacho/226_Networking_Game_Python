@@ -47,13 +47,13 @@ def getSpawnPoint():
 def transmitting(con, spawnPoint, thisPlayerID):
     try:
         data = con.recv(1024)
-        print(len(data))
+        #print(len(data))
         if not data:
             return False   
         dataReceive = struct.unpack('!Bbb', data)
         if(dataReceive[0] == FLAG_CREATE_PLAYER):
             playerData = struct.pack('!Bbb', FLAG_CREATE_PLAYER, thisPlayerID, NO_DATA) # 0 means no data
-            print(struct.unpack('!Bbb', playerData))
+            #print(struct.unpack('!Bbb', playerData))
             con.sendall(playerData)
         if(dataReceive[0] == FLAG_BOARD_SIZE):
             dataToSend2 = struct.pack('!Bbb', FLAG_BOARD_SIZE, row, col)
@@ -63,7 +63,7 @@ def transmitting(con, spawnPoint, thisPlayerID):
             con.sendall(dataToSend3)
         if(dataReceive[0] == FLAG_POSITION):
             dataToSend = struct.pack('!Bbb', FLAG_POSITION, dataReceive[1], dataReceive[2])
-            print("Player position at :", dataToSend[1], dataToSend[2])
+            #print("Player position at :", dataToSend[1], dataToSend[2])
             con.sendall(dataToSend)
         #con.sendall(b'')
     except Exception as e:

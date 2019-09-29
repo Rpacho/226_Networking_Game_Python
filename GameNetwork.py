@@ -2,8 +2,9 @@
 
 import socket
 import struct
-import ReadingData
+import ReadingData  # Testing library for lab 1 need to delete later before handing in
 
+# This Class is for creating a network that connect to the server
 class Network():
     def __init__(self):
         self.con = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -36,7 +37,10 @@ class Network():
             print(e)
 
 
+# FLAG_CREATE_PLAYER = 0b0010
 # n = Network()
+# playerUID = n.sendData(FLAG_CREATE_PLAYER, 0, 0)
+# print(playerUID)
 # #print(n.sendData("Hello"))
 # data = struct.pack('!BBB', 2, 3, 0b0111)
 # data2 = n.sendData(data)

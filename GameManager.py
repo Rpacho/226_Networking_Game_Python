@@ -10,8 +10,6 @@ class GamePlayerManager():
         self.playerUID = playerID   # Don't put setter function on this
         self.playerPosY = startPosY
         self.playerPosX = startPosX
-        self.player1Turn = False
-        self.player2Turn = False
 
     # This function return the icon of the player.
     # @param
@@ -53,19 +51,27 @@ class GamePlayerManager():
 
 # this class is for keeping track of the game
 class GameDataManager():
-    def __init__(self, conPlayer1, gameID, numPlayer):
-        self.con1 = conPlayer1
-        self.con2 = conPlayer1
+    def __init__(self, gameID, numPlayer):
+        self.con1 = None
+        self.con2 = None
         self.game_id = gameID
         self.num_player = numPlayer
         self.isItReady = False
         self.playe1Ready = False
         self.player2Ready = False
+        self.player1Turn = False
+        self.player2Turn = False
+        self.player1_ID = 0
+        self.player2_ID = 0
+        self.player1PosY = 0
+        self.player1PosX = 0
+        self.player2PosY = 0
+        self.player2PosX = 0
 
     ### Getters ### for GameDataManager
 
     # This function returns the player 1 connection
-    def getPlayerConnection(self):
+    def getPlayerConnection1(self):
         return self.con1
     # This function returns the player 2 connection
     def getPlayerConnection2(self):
@@ -78,6 +84,24 @@ class GameDataManager():
         return self.num_player
     def getReady(self):
         return self.isItReady
+    # This function return Y position player1
+    def getPlayer1PosY(self):
+        return self.player1PosY
+    # This function return X position player1
+    def getPlayer1PosX(self):
+        return self.player1PosX
+    # This function return Y position player2
+    def getPlayer2PosY(self):
+        return self.player2PosY
+    # This function return X position player2
+    def getPlayer2PosX(self):
+        return self.player2PosX
+    # This function return the id of player1
+    def getPlayer1ID(self):
+        return self.player1_ID
+    # This function return the id of player2
+    def getPlayer2ID(self):
+        return self.player2_ID
 
     #### Setters ### for GameDataManager
 
@@ -89,6 +113,10 @@ class GameDataManager():
     # @param , socket con
     def setPlayer2Con(self, con):
         self.con2 = con
+    # This function sets if player 1 connection
+    # @param , socket con
+    def setPlayer1Con(self, con):
+        self.con1 = con
     # This function sets the number of player
     # @param , int numPlayer
     def setNumPlayer(self, numPlayer):
@@ -101,6 +129,24 @@ class GameDataManager():
     # @param , bool ready
     def setPlayer2Ready(self, ready):
         self.player2Ready = ready
+    # This function sets the spawn Y position player1
+    def setPlayer1PosY(self, posY):
+        self.player1PosY = posY
+    # This function sets the spawn X position player1
+    def setPlayer1PosX(self, posX):
+        self.player1PosX = posX
+    # This function sets the spawn Y position player2
+    def setPlayer2PosY(self, posY):
+        self.player2PosY = posY
+    # This function sets the spawn X position player2
+    def setPlayer2PosX(self, posX):
+        self.player2PosX = posX
+    # This function sets the id of player1
+    def setPlayer1ID(self, id):
+        self.player1_ID = id
+    # This function sets the id of player2
+    def setPlayer2ID(self, id):
+        self.player2_ID = id
     
 
 

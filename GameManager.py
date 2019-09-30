@@ -102,6 +102,12 @@ class GameDataManager():
     # This function return the id of player2
     def getPlayer2ID(self):
         return self.player2_ID
+    # This function return the player 1 Turn
+    def getPlayer1Turn(self):
+        return self.player1Turn
+    # This function return the player 2 Turn
+    def getPlayer2Turn(self):
+        return self.player2Turn
 
     #### Setters ### for GameDataManager
 
@@ -147,6 +153,12 @@ class GameDataManager():
     # This function sets the id of player2
     def setPlayer2ID(self, id):
         self.player2_ID = id
+    # This function sets the player 1 Turn
+    def setPlayer1Turn(self, turn):
+        self.player1Turn = turn
+    # This function sets the player 2 Turn
+    def setPlayer2Turn(self, turn):
+        self.player2Turn = turn
     
 
 

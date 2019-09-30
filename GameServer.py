@@ -81,8 +81,16 @@ def transmitting(con, spawnPoint, thisPlayerID):
                 , gameManager.getPlayer1PosX())
                 #print("Player position at :", dataToSend[1], dataToSend[2])
                 con.sendall(dataToSend)
+                gameManager.setPlayer1Turn(False)
+                gameManager.setPlayer2Turn(True)
+                
+                #print('Player 2 Turn',gameManager.getPlayer2Turn())
+            if(dataReceive[0] == FLAG_PLAYER_TURNS):
+                dataToSend2 = struct.pack('!Bbb', FLAG_PLAYER_TURNS, gameManager.getPlayer1Turn(), NO_DATA)
+                con.sendall(dataToSend2)
+                
             #Receiving
-            print("Player 1", thisPlayerID)
+            #print("Player 1", thisPlayerID)
             if(dataReceive[0] == FLAG_CREATE_OP):
                 playerData = struct.pack('!Bbb', FLAG_CREATE_OP, gameManager.getPlayer2ID(), NO_DATA)
                 con.sendall(playerData)
@@ -98,9 +106,16 @@ def transmitting(con, spawnPoint, thisPlayerID):
                 , gameManager.getPlayer2PosX())
                 #print("Player position at :", dataToSend[1], dataToSend[2])
                 con.sendall(dataToSend)
+                gameManager.setPlayer2Turn(False)
+                gameManager.setPlayer1Turn(True)
+                #print('Player 1 Turn ', gameManager.getPlayer1Turn())
+            if(dataReceive[0] == FLAG_PLAYER_TURNS):
+                dataToSend2 = struct.pack('!Bbb', FLAG_PLAYER_TURNS, gameManager.getPlayer2Turn(), NO_DATA)
+                con.sendall(dataToSend2)
+                
 
             # Receiving
-            print("Player 2", thisPlayerID)
+            #print("Player 2", thisPlayerID)
             if(dataReceive[0] == FLAG_CREATE_OP):
                 playerData = struct.pack('!Bbb', FLAG_CREATE_OP, gameManager.getPlayer1ID(), NO_DATA)
                 con.sendall(playerData)
@@ -130,6 +145,7 @@ def thread_player(con, player):
         gameManager.setPlayer1PosX(positionX)
         gameManager.setPlayer1ID(thisPlayerID)
         gameManager.setPlayer1Ready(True)
+        gameManager.setPlayer1Turn(True)
         print("Waiting for other players to get ready..")
     elif(thisPlayerID == 2):
         gameManager.setPlayer2PosY(positionY)
@@ -143,7 +159,6 @@ def thread_player(con, player):
         if gameManager.getReady() == False:
             continue
         try:
-            print("Start transmmiting")
             # player 1 Transmmiting data
             # if(thisPlayerID == 1):
             #     if((transmitting(gameManager.getPlayerConnection1(), spawnPoint, thisPlayerID)) == False):
@@ -151,6 +166,8 @@ def thread_player(con, player):
             # elif(thisPlayerID == 2):
             #     if((transmitting(gameManager.getPlayerConnection2(), spawnPoint, thisPlayerID)) == False):
             #         break
+            print('Player 1 Turn ', gameManager.getPlayer1Turn())
+            print('Player 2 Turn ', gameManager.getPlayer2Turn())
             if((transmitting(con, spawnPoint, thisPlayerID)) == False):
                 break
             # player 2 Transmmiting data

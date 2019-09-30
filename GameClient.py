@@ -14,7 +14,7 @@ NO_DATA = 0
 player_id = 0
 players = []
 numPlayers = 0
-
+myTurn = False
 # data Transmitting protocol
 FLAG_SPAWN_POINT = 0b0001
 FLAG_POSITION = 0b0011
@@ -38,13 +38,16 @@ def createPlayer(playerID, posY, posX):
         if(players[i].getPlayerID() == playerID):
             return i
 
-# This function is to identify who is turn to move
+# This function is update the other player position
 def getUpdate(net, otherPlayer, stdscr):
     #playerTurn = net.sendData(FLAG_PLAYER_TURNS, NO_DATA, NO_DATA)
     otherSpawnPosition = net.sendData(FLAG_SPAWN_OP, NO_DATA, NO_DATA)
     if(otherSpawnPosition[0] == FLAG_SPAWN_OP):
+        stdscr.addstr(otherPlayer.getPlayerPosY(), otherPlayer.getPlayerPosX(), "_")
         OtherPlayerPosY = otherSpawnPosition[1]
         OtherPlayerPosX = otherSpawnPosition[2]
+        otherPlayer.setPlayerPosY(OtherPlayerPosY)
+        otherPlayer.setPlayerPosX(OtherPlayerPosX)
         updatePosition(stdscr, otherPlayer)
     # if playerTurn[0] == FLAG_PLAYER_TURNS:
     #     if playerTurn[1] == True:
@@ -73,11 +76,19 @@ def movePosition(net, stdscr, posY, posX, player):
         print("Error: movePosition Function GameClient Not Sending Data")
 
     return
+def getMoveTurn(net):
+    global myTurn
+    playerTurn = net.sendData(FLAG_PLAYER_TURNS, NO_DATA, NO_DATA)
+    if playerTurn[1] == True:
+        myTurn = True
+    else:
+        myTurn = False
 
 
 ######### MAIN #########
 # Initiate prepack Curses and start the game
 def main(stdscr):
+    global myTurn
     net = Network()
     curses.curs_set(0)
 
@@ -123,32 +134,37 @@ def main(stdscr):
         # time.sleep(3)
         # break
         while True:
-            stdscr.refresh()
             getUpdate(net, players[otherPlayer_id], stdscr)
-            #if turnplayer == True:
-            key = stdscr.getch()
-            if key == curses.KEY_DOWN:
-                stdscr.addstr(playerPosY, playerPosX, "_")
-                playerPosY = playerPosY + 1
-                movePosition(net, stdscr, playerPosY, playerPosX, players[player_id])
+            stdscr.refresh()
+            getMoveTurn(net)
+            if(myTurn == True):
+                key = stdscr.getch()
+                if key == curses.KEY_DOWN:
+                    stdscr.addstr(playerPosY, playerPosX, "_")
+                    playerPosY = playerPosY + 1
+                    movePosition(net, stdscr, playerPosY, playerPosX, players[player_id])
                 # if key == curses.KEY_UP:
                 #     stdscr.addstr(playerPosY, playerPosX, "_")
                 #     playerPosY = playerPosY - 1
-                #     movePosition(net, stdscr, playerPosY, playerPosX, players[playerIndex])
+                #     movePosition(net, stdscr, playerPosY, playerPosX, players[player_id])
                 # elif key == curses.KEY_DOWN:
                 #     stdscr.addstr(playerPosY, playerPosX, "_")
                 #     playerPosY = playerPosY + 1
-                #     movePosition(net, stdscr, playerPosY, playerPosX, players[playerIndex])
+                #     movePosition(net, stdscr, playerPosY, playerPosX, players[player_id])
                 # elif key == curses.KEY_LEFT:
                 #     stdscr.addstr(playerPosY, playerPosX, "_")
                 #     playerPosX = playerPosX - 2
-                #     movePosition(net, stdscr, playerPosY, playerPosX, players[playerIndex])
+                #     movePosition(net, stdscr, playerPosY, playerPosX, players[player_id])
                 # elif key == curses.KEY_RIGHT:
                 #     stdscr.addstr(playerPosY, playerPosX, "_")
                 #     playerPosX = playerPosX + 2
-                #     movePosition(net, stdscr, playerPosY, playerPosX, players[playerIndex])
+                #     movePosition(net, stdscr, playerPosY, playerPosX, players[player_id])
                 # elif key == curses.KEY_ENTER:
                 #     exit()
+                #     #stdscr.refresh()
+                myTurn = False
+            else:
+                continue
 
 
 curses.wrapper(main)

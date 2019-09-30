@@ -14,6 +14,7 @@ MAX_PLAYER = 2
 playerID = 1 # We can also use this for getting the # of current players online
 spawnPoint_1 = [0,0]
 spawnPoint_2 = [9,38]
+countAllPlayerTurn = 0
 
 #Flag for transmiting data
 FLAG_SPAWN_POINT = 0b0001
@@ -48,6 +49,7 @@ def getSpawnPoint():
 # GUI
 ## This function is for receiving and sending data
 def transmitting(con, spawnPoint, thisPlayerID):
+    global countAllPlayerTurn
     try:
         data = con.recv(1024)
         #print(len(data))
@@ -79,6 +81,8 @@ def transmitting(con, spawnPoint, thisPlayerID):
                 , gameManager.getPlayer1PosX())
                 #print("Player position at :", dataToSend[1], dataToSend[2])
                 con.sendall(dataToSend)
+                countAllPlayerTurn += 1
+                print(countAllPlayerTurn)
                 # gameManager.setPlayer1Turn(False)
                 # gameManager.setPlayer2Turn(True)
                 
@@ -104,6 +108,8 @@ def transmitting(con, spawnPoint, thisPlayerID):
                 , gameManager.getPlayer2PosX())
                 #print("Player position at :", dataToSend[1], dataToSend[2])
                 con.sendall(dataToSend)
+                countAllPlayerTurn += 1
+                print(countAllPlayerTurn)
                 # gameManager.setPlayer2Turn(False)
                 # gameManager.setPlayer1Turn(True)
                 #print('Player 1 Turn ', gameManager.getPlayer1Turn())
@@ -127,6 +133,7 @@ def transmitting(con, spawnPoint, thisPlayerID):
 
 # Isolating the connection of the player by threading
 def thread_player(con, player):
+    global countAllPlayerTurn
     global playerID
     msg = "Welcome to server"
     print(msg, ' Player ', playerID)
@@ -141,7 +148,6 @@ def thread_player(con, player):
         gameManager.setPlayer1PosX(positionX)
         gameManager.setPlayer1ID(thisPlayerID)
         gameManager.setPlayer1Ready(True)
-        gameManager.setPlayer1Turn(True)
         print("Waiting for other players to get ready..")
     elif(thisPlayerID == 2):
         gameManager.setPlayer2PosY(positionY)
@@ -163,8 +169,12 @@ def thread_player(con, player):
             # elif(thisPlayerID == 2):
             #     if((transmitting(gameManager.getPlayerConnection2(), spawnPoint, thisPlayerID)) == False):
             #         break
-            print('Player 1 Turn ', gameManager.getPlayer1Turn())
-            print('Player 2 Turn ', gameManager.getPlayer2Turn())
+            if(countAllPlayerTurn % 2 == 0):
+                gameManager.setPlayer1Turn(True)
+                gameManager.setPlayer2Turn(False)
+            else:
+                gameManager.setPlayer2Turn(True)
+                gameManager.setPlayer1Turn(False)
             if((transmitting(con, spawnPoint, thisPlayerID)) == False):
                 break
             # player 2 Transmmiting data

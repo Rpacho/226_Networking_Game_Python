@@ -133,18 +133,27 @@ def main(stdscr):
         myTurn = getMoveTurn(net)
         # time.sleep(3)
         # break
+
+        ### Second iteration
         while True:
             getUpdate(net, players[otherPlayer_id], stdscr)
             stdscr.refresh()
-            if(myTurn == False):
-                continue
-            else:
+            if(getMoveTurn(net) == True):
+                stdscr.addstr(0, 60, "Your Turn")
+                stdscr.addstr(0, 69, " ")
                 key = stdscr.getch()
                 if key == curses.KEY_DOWN:
                     stdscr.addstr(playerPosY, playerPosX, "_")
                     playerPosY = playerPosY + 1
                     movePosition(net, stdscr, playerPosY, playerPosX, players[player_id])
-                myTurn = False
+                    getUpdate(net, players[otherPlayer_id], stdscr)
+                    stdscr.refresh()
+            elif(getMoveTurn(net) == False):
+                stdscr.addstr(0, 60, "Wait For Your Turn")
+                continue
+                # stdscr.addstr(playerPosY, playerPosX, "_")
+                # playerPosY = playerPosY + 1
+                # movePosition(net, stdscr, playerPosY, playerPosX, players[player_id])
                 # if key == curses.KEY_UP:
                 #     stdscr.addstr(playerPosY, playerPosX, "_")
                 #     playerPosY = playerPosY - 1
@@ -164,7 +173,6 @@ def main(stdscr):
                 # elif key == curses.KEY_ENTER:
                 #     exit()
                 #     #stdscr.refresh()
-                myTurn = False
 
 
 curses.wrapper(main)

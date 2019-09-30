@@ -77,12 +77,11 @@ def movePosition(net, stdscr, posY, posX, player):
 
     return
 def getMoveTurn(net):
-    global myTurn
     playerTurn = net.sendData(FLAG_PLAYER_TURNS, NO_DATA, NO_DATA)
     if playerTurn[1] == True:
-        myTurn = True
+        return True
     else:
-        myTurn = False
+        return False
 
 
 ######### MAIN #########
@@ -131,18 +130,21 @@ def main(stdscr):
         # Spawn the player
         updatePosition(stdscr, players[player_id])
         updatePosition(stdscr, players[otherPlayer_id])
+        myTurn = getMoveTurn(net)
         # time.sleep(3)
         # break
         while True:
             getUpdate(net, players[otherPlayer_id], stdscr)
             stdscr.refresh()
-            getMoveTurn(net)
-            if(myTurn == True):
+            if(myTurn == False):
+                continue
+            else:
                 key = stdscr.getch()
                 if key == curses.KEY_DOWN:
                     stdscr.addstr(playerPosY, playerPosX, "_")
                     playerPosY = playerPosY + 1
                     movePosition(net, stdscr, playerPosY, playerPosX, players[player_id])
+                myTurn = False
                 # if key == curses.KEY_UP:
                 #     stdscr.addstr(playerPosY, playerPosX, "_")
                 #     playerPosY = playerPosY - 1
@@ -163,8 +165,6 @@ def main(stdscr):
                 #     exit()
                 #     #stdscr.refresh()
                 myTurn = False
-            else:
-                continue
 
 
 curses.wrapper(main)

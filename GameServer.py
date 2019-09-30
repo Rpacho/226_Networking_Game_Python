@@ -45,9 +45,7 @@ def getSpawnPoint():
         return spawnPoint_1
     if playerID == 2:
         return spawnPoint_2
-
 # GUI
-
 ## This function is for receiving and sending data
 def transmitting(con, spawnPoint, thisPlayerID):
     try:
@@ -112,8 +110,6 @@ def transmitting(con, spawnPoint, thisPlayerID):
             if(dataReceive[0] == FLAG_PLAYER_TURNS):
                 dataToSend2 = struct.pack('!Bbb', FLAG_PLAYER_TURNS, gameManager.getPlayer2Turn(), NO_DATA)
                 con.sendall(dataToSend2)
-                
-
             # Receiving
             #print("Player 2", thisPlayerID)
             if(dataReceive[0] == FLAG_CREATE_OP):
@@ -152,7 +148,7 @@ def thread_player(con, player):
         gameManager.setPlayer2PosX(positionX)
         gameManager.setPlayer2ID(thisPlayerID)
         gameManager.setPlayer2Ready(True)
-        gameManager.setPlayer2Turn(True)
+        #gameManager.setPlayer2Turn(True)
         print("Players 2 are ready.. \n Game Starting...")
     playerID += 1
     while True:

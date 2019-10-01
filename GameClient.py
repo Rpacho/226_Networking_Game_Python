@@ -65,14 +65,13 @@ def movePosition(net, stdscr, posY, posX, player):
     return
     # For this player
 def controller(stdscr, net, myTurn):
+    
     stdscr.addstr(0 , 60, "Your Turn         ")
     posY = players[0].getPlayerPosY()
     posX = players[0].getPlayerPosX()
     if myTurn == True:
         key = stdscr.getch()
-    logger.debug(players[0].getPlayerID())
-    logger.debug(myTurn)
-    logger.debug(key)
+    logger.debug("Pressed Keys" + str(players[0].getPlayerID()))
     if key == curses.KEY_UP and myTurn == True:
         reDrawMyPreviousLocation(stdscr, players[0])
         playerPosY = posY - 1
@@ -120,9 +119,10 @@ def main(stdscr):
     myTurn = False
     while True:
         stdscr.addstr(0, 60, "Wait for your Turn")
-        #stdscr.keypad(0)
+        stdscr.keypad(0)
         stdscr.refresh()
         data = GetBuff.getbuf(net.con, 3)
+        stdscr.keypad(1)
         if len(data) > 0:
         # If other players are connected and we receive thier data, store them in our players collection
             if data[0] == FLAG_PLAYER2_CREATE:
@@ -133,7 +133,7 @@ def main(stdscr):
                 updatePosition(stdscr, players[0]) # Temporary fix
                 updatePosition(stdscr, players[1])
             if data[0] == FLAG_CLEAR_BUFFER:
-                myTurn = True
+                myTurn = data[1]
             if data[0] == FLAG_PLAYER_TURNS and myTurn == True:
                 while True:
                     validInput = controller(stdscr, net, myTurn)

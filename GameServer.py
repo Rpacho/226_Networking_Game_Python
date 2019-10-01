@@ -5,13 +5,19 @@ import threading
 import DrawGui
 import struct
 from GameManager import GameDataManager
+import logging
+import logging.handlers
+logger = logging.getLogger('GameServer.py')
+logger.setLevel(logging.DEBUG)
+handle = logging.FileHandler('Serverlog.txt')
+logger.addHandler(handle)
 
 HOST_IP = ''
 PORT = 12345
 
 # Player Config
 MAX_PLAYER = 2
-playerID = 1 # We can also use this for getting the # of current players online
+playerID = 0 # We can also use this for getting the # of current players online
 spawnPoint_1 = [0,0]
 spawnPoint_2 = [9,38]
 countAllPlayerTurn = 0
@@ -26,6 +32,7 @@ FLAG_GAME_START = 0b0100
 FLAG_CREATE_OP = 0b0101
 FLAG_SPAWN_OP = 0b0110
 FLAG_PLAYER_TURNS = 0b1001
+FLAG_DONE_TURNS = 0b1000
 NO_DATA = 0
 connect = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -33,26 +40,36 @@ connect = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 try:
     connect.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     connect.bind((HOST_IP, PORT))
-    connect.listen(MAX_PLAYER)
+    connect.listen()
     print("Connection connected. Server is up!")
 except:
     print("Cannnot establish connection. Server Down!")
 
 row = 10
 col = 20
+
+# Semaphores
+locks = []
+for i in range(2):
+    locks.append(threading.Semaphore())
+    locks[-1].acquire()
+global gameManager
 # This return the spawnpoint for different player
 def getSpawnPoint():
-    if playerID == 1:
+    if playerID == 0:
         return spawnPoint_1
-    if playerID == 2:
+    if playerID == 1:
         return spawnPoint_2
 # GUI
+
+
 ## This function is for receiving and sending data
 def transmitting(con, spawnPoint, thisPlayerID):
-    global countAllPlayerTurn
     try:
+        print('Player ', thisPlayerID)
+        print('Player 1 turn ', gameManager.getPlayer1Turn())
+        print('Player 2 turn ', gameManager.getPlayer2Turn())
         data = con.recv(1024)
-        #print(len(data))
         if not data:
             return False   
         dataReceive = struct.unpack('!Bbb', data)
@@ -72,52 +89,50 @@ def transmitting(con, spawnPoint, thisPlayerID):
             con.sendall(dataToSend3)
         #con.sendall(b'')
         ### PLAYER WHO ###
-        if(thisPlayerID == 1):
-            #Sending
+        if(thisPlayerID == 0):
             if(dataReceive[0] == FLAG_POSITION):
                 gameManager.setPlayer1PosY(dataReceive[1])
                 gameManager.setPlayer1PosX(dataReceive[2])
-                dataToSend = struct.pack('!Bbb', FLAG_POSITION, gameManager.getPlayer1PosY()
-                , gameManager.getPlayer1PosX())
-                #print("Player position at :", dataToSend[1], dataToSend[2])
+                dataToSend = struct.pack('!Bbb', FLAG_POSITION, gameManager.getPlayer1PosY(), gameManager.getPlayer1PosX())
                 con.sendall(dataToSend)
-                countAllPlayerTurn += 1
-                print(countAllPlayerTurn)
-                # gameManager.setPlayer1Turn(False)
-                # gameManager.setPlayer2Turn(True)
-                
-                #print('Player 2 Turn',gameManager.getPlayer2Turn())
+                dataToSendP2 = struct.pack('!Bbb', FLAG_SPAWN_OP, gameManager.getPlayer1PosY(), gameManager.getPlayer1PosX())
+                gameManager.getPlayerConnection2().sendall(dataToSendP2)
             if(dataReceive[0] == FLAG_PLAYER_TURNS):
                 dataToSend2 = struct.pack('!Bbb', FLAG_PLAYER_TURNS, gameManager.getPlayer1Turn(), NO_DATA)
                 con.sendall(dataToSend2)
-                
-            #Receiving
-            #print("Player 1", thisPlayerID)
+            if(dataReceive[0] == FLAG_DONE_TURNS):
+                logger.debug(thisPlayerID)
+                logger.debug(dataReceive[0])
+                dataToSend2 = struct.pack('!Bbb', FLAG_DONE_TURNS, NO_DATA, NO_DATA)
+                con.sendall(dataToSend2)
+                if dataToSend2[1] == True:
+                    gameManager.setPlayer1Turn(False)
+                    gameManager.setPlayer2Turn(True)
             if(dataReceive[0] == FLAG_CREATE_OP):
                 playerData = struct.pack('!Bbb', FLAG_CREATE_OP, gameManager.getPlayer2ID(), NO_DATA)
                 con.sendall(playerData)
             if(dataReceive[0] == FLAG_SPAWN_OP):
                 dataToSend3 = struct.pack('!Bbb', FLAG_SPAWN_OP, gameManager.getPlayer2PosY(), gameManager.getPlayer2PosX())
                 con.sendall(dataToSend3)
-        else:
-            # Sending
+        elif(thisPlayerID == 1):
             if(dataReceive[0] == FLAG_POSITION):
                 gameManager.setPlayer2PosY(dataReceive[1])
                 gameManager.setPlayer2PosX(dataReceive[2])
-                dataToSend = struct.pack('!Bbb', FLAG_POSITION, gameManager.getPlayer2PosY()
-                , gameManager.getPlayer2PosX())
-                #print("Player position at :", dataToSend[1], dataToSend[2])
+                dataToSend = struct.pack('!Bbb', FLAG_POSITION, gameManager.getPlayer2PosY(), gameManager.getPlayer2PosX())
                 con.sendall(dataToSend)
-                countAllPlayerTurn += 1
-                print(countAllPlayerTurn)
-                # gameManager.setPlayer2Turn(False)
-                # gameManager.setPlayer1Turn(True)
-                #print('Player 1 Turn ', gameManager.getPlayer1Turn())
+                dataToSendP2 = struct.pack('!Bbb', FLAG_SPAWN_OP, gameManager.getPlayer1PosY(), gameManager.getPlayer1PosX())
+                gameManager.getPlayerConnection2().sendall(dataToSendP2)
+            if(dataReceive[0] == FLAG_DONE_TURNS):
+                logger.debug(thisPlayerID)
+                logger.debug(dataReceive[0])
+                dataToSend2 = struct.pack('!Bbb', FLAG_DONE_TURNS, NO_DATA, NO_DATA)
+                con.sendall(dataToSend2)
+                if dataToSend2[1] == True:
+                    gameManager.setPlayer1Turn(True)
+                    gameManager.setPlayer2Turn(False)
             if(dataReceive[0] == FLAG_PLAYER_TURNS):
                 dataToSend2 = struct.pack('!Bbb', FLAG_PLAYER_TURNS, gameManager.getPlayer2Turn(), NO_DATA)
                 con.sendall(dataToSend2)
-            # Receiving
-            #print("Player 2", thisPlayerID)
             if(dataReceive[0] == FLAG_CREATE_OP):
                 playerData = struct.pack('!Bbb', FLAG_CREATE_OP, gameManager.getPlayer1ID(), NO_DATA)
                 con.sendall(playerData)
@@ -132,8 +147,7 @@ def transmitting(con, spawnPoint, thisPlayerID):
 
 
 # Isolating the connection of the player by threading
-def thread_player(con, player):
-    global countAllPlayerTurn
+def thread_player(con):
     global playerID
     msg = "Welcome to server"
     print(msg, ' Player ', playerID)
@@ -143,70 +157,64 @@ def thread_player(con, player):
     positionX = spawnPoint[1]
     thisPlayerID = playerID
     ## Initial settings for players
-    if(thisPlayerID == 1):
+    if(thisPlayerID == 0):
         gameManager.setPlayer1PosY(positionY)
         gameManager.setPlayer1PosX(positionX)
         gameManager.setPlayer1ID(thisPlayerID)
-        gameManager.setPlayer1Ready(True)
+        #gameManager.setPlayer1Ready(True)
+        gameManager.setPlayer1Turn(True)
         print("Waiting for other players to get ready..")
-    elif(thisPlayerID == 2):
+    elif(thisPlayerID == 1):
         gameManager.setPlayer2PosY(positionY)
         gameManager.setPlayer2PosX(positionX)
         gameManager.setPlayer2ID(thisPlayerID)
         gameManager.setPlayer2Ready(True)
+        #gameManager.setPlayer2Turn(False)
         #gameManager.setPlayer2Turn(True)
         print("Players 2 are ready.. \n Game Starting...")
     playerID += 1
     while True:
-        gameManager.setReady() # sets if all players are ready
-        if gameManager.getReady() == False:
-            continue
+        locks[thisPlayerID].acquire()
         try:
-            # player 1 Transmmiting data
-            # if(thisPlayerID == 1):
-            #     if((transmitting(gameManager.getPlayerConnection1(), spawnPoint, thisPlayerID)) == False):
-            #         break
-            # elif(thisPlayerID == 2):
-            #     if((transmitting(gameManager.getPlayerConnection2(), spawnPoint, thisPlayerID)) == False):
-            #         break
-            if(countAllPlayerTurn % 2 == 0):
-                gameManager.setPlayer1Turn(True)
-                gameManager.setPlayer2Turn(False)
-            else:
-                gameManager.setPlayer2Turn(True)
-                gameManager.setPlayer1Turn(False)
+            print("Player 1 ", gameManager.getPlayer1Turn())
+            # #print(thisPlayerID)
+            print("Player 2 ", gameManager.getPlayer2Turn())
             if((transmitting(con, spawnPoint, thisPlayerID)) == False):
-                break
-            # player 2 Transmmiting data
-            # if(thisPlayerID == 1):
-            #     print('player 1, confirming: ', thisPlayerID, ' sending data to player 2')
-            #     if((transmitting(gameManager.getPlayerConnection2(), spawnPoint, thisPlayerID)) == False):
-            #         break
-            # elif(thisPlayerID == 2):
-            #     print('player 2, confirming: ', thisPlayerID, ' sending data to player 1')
-            #     if((transmitting(gameManager.getPlayerConnection1(), spawnPoint, thisPlayerID)) == False):
-            #         break
+                continue
         except Exception as e:
             print(e)
             break
+        locks[(thisPlayerID + 1) % 2].release()
     print("Connection lost Player ", thisPlayerID)
     con.close()
 
+def gameStart(num_player):
+    if num_player == 2:
+        for i in range(num_player):
+            if i == 0:
+                playerCon = gameManager.getPlayerConnection1()
+            if i == 1:
+                playerCon = gameManager.getPlayerConnection2()
+            threading.Thread(target=thread_player, args=(playerCon,)).start()
+        locks[0].release()
+
 # Client connect to Server
+player = 0
 while True:
     con, socketname = connect.accept()
     gameID = 1
-    player = 0
-    global gameManager
-    if gameID == 1 and playerID == 1:   # Should always execute first when first player connects
+    print(player)
+    if gameID == 1 and player == 0:   # Should always execute first when first player connects
         gameManager = GameDataManager(gameID, playerID)
         gameManager.setPlayer1Con(con)
-        player = 1
-    elif(gameID == 1 and playerID == 2):
+        player += 1
+    elif(gameID == 1 and player == 1):
         gameManager.setPlayer2Con(con)
         gameManager.setNumPlayer(playerID)
-        gameID += 1
-        player = 2
+        #gameID += 1
+        player += 1
     # Temporary
+    print(con.getpeername())
+    #con.close()
+    gameStart(player)
     
-    threading.Thread(target=thread_player, args=(con, player)).start()

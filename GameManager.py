@@ -16,9 +16,9 @@ class GamePlayerManager():
     # int playerID - the unique id of the player
     def setPlayerIcon(self, id):
         playerIcon = ""
-        if id == 1:
+        if id == 0:
             playerIcon = "Y"
-        elif id == 2:
+        elif id == 1:
             playerIcon = "X"
         return playerIcon
     

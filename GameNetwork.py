@@ -31,9 +31,44 @@ class Network():
             #print(reply)
             if not reply:
                 return False
-            unpackReply = struct.unpack('!Bbb', reply)
-            return unpackReply
+            #unpackReply = struct.unpack('!Bbb', reply)
+            return reply
         except socket.error as e:
             print(e)
 
+
+# FLAG_SPAWN_POINT = 0b0001  # 1
+# FLAG_POSITION = 0b0011  # 3
+# FLAG_BOARD_SIZE = 0b0111  # 7
+# FLAG_BOARD_TREASURE = 0b1111  # 15
+# FLAG_CREATE_PLAYER = 0b0010  # 2
+# FLAG_GAME_START = 0b0100  # 4
+# FLAG_PLAYER2_POSITION = 0b0101  # 5
+# FLAG_PLAYER2_CREATE = 0b0110  # 6
+# FLAG_PLAYER_TURNS = 0b1001  # 9
+# FLAG_DONE_TURNS = 0b1000  # 8
+# NO_DATA = 0
+# n = Network()
+
+# print(n.sendData(FLAG_CREATE_PLAYER, NO_DATA, NO_DATA))
+# print(n.sendData(FLAG_BOARD_SIZE, NO_DATA, NO_DATA))
+# print(n.sendData(FLAG_SPAWN_POINT, NO_DATA, NO_DATA))
+# print(n.sendData(FLAG_DONE_TURNS, NO_DATA, NO_DATA))
+# def input1():
+#     x = input("Enter Int ")
+#     i = int(x)
+#     n.sendData(FLAG_POSITION, i, NO_DATA)
+# while True:
+    
+#     data = GetBuff.getbuf(n.con, 3)
+#     if len(data) > 0:
+#         if data[0] == FLAG_PLAYER2_CREATE:
+#             print(data)
+#         if data[0] == FLAG_PLAYER2_POSITION:
+#             print(data)
+#         if data[0] == FLAG_PLAYER_TURNS:
+#             input1()
+
+
+        
 

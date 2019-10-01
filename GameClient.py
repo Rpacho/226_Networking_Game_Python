@@ -69,25 +69,24 @@ def controller(stdscr, net, myTurn):
     stdscr.addstr(0 , 60, "Your Turn         ")
     posY = players[0].getPlayerPosY()
     posX = players[0].getPlayerPosX()
-    if myTurn == True:
-        key = stdscr.getch()
+    key = stdscr.getch()
     logger.debug("Pressed Keys" + str(players[0].getPlayerID()))
-    if key == curses.KEY_UP and myTurn == True:
+    if key == curses.KEY_UP:
         reDrawMyPreviousLocation(stdscr, players[0])
         playerPosY = posY - 1
         movePosition(net, stdscr, playerPosY, posX, players[0])
         return True
-    elif key == curses.KEY_DOWN and myTurn == True:
+    elif key == curses.KEY_DOWN:
         reDrawMyPreviousLocation(stdscr, players[0])
         playerPosY = posY + 1
         movePosition(net, stdscr, playerPosY, posX, players[0])
         return True
-    elif key == curses.KEY_LEFT and myTurn == True:
+    elif key == curses.KEY_LEFT:
         reDrawMyPreviousLocation(stdscr, players[0])
         playerPosX = posX - 2
         movePosition(net, stdscr, posY, playerPosX, players[0])
         return True
-    elif key == curses.KEY_RIGHT and myTurn == True:
+    elif key == curses.KEY_RIGHT:
         reDrawMyPreviousLocation(stdscr, players[0])
         playerPosX = posX + 2
         movePosition(net, stdscr, posY, playerPosX, players[0])
@@ -116,7 +115,6 @@ def main(stdscr):
     # Index 0 will always be this player
     updatePosition(stdscr, players[0])
     stdscr.refresh()
-    myTurn = False
     while True:
         stdscr.addstr(0, 60, "Wait for your Turn")
         stdscr.keypad(0)
@@ -132,14 +130,11 @@ def main(stdscr):
                 setPositionPlayer2(players[1], data[1], data[2])    # Index 1 will always be player 2
                 updatePosition(stdscr, players[0]) # Temporary fix
                 updatePosition(stdscr, players[1])
-            if data[0] == FLAG_CLEAR_BUFFER:
-                myTurn = data[1]
-            if data[0] == FLAG_PLAYER_TURNS and myTurn == True:
+            if data[0] == FLAG_PLAYER_TURNS:
                 while True:
                     validInput = controller(stdscr, net, myTurn)
                     if(validInput == True):
                         stdscr.addstr(1, 60, "                ")
-                        myTurn = False
                         break
                     
 

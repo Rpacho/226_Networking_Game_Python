@@ -99,10 +99,10 @@ def update(con, player_id):
 
         locks[player_id].acquire()  #### LOCK #####
         # Send a signal to unlock your keypad
-        sendDataUnlock = packData(FLAG_CLEAR_BUFFER, True, NO_DATA)
-        sendDataLock = packData(FLAG_CLEAR_BUFFER, False, NO_DATA)
-        players[player_id].getPlayerCon().sendall(sendDataUnlock)
-        players[(player_id + 1) % 2].getPlayerCon().sendall(sendDataLock)
+        # sendDataUnlock = packData(FLAG_CLEAR_BUFFER, True, NO_DATA)
+        # sendDataLock = packData(FLAG_CLEAR_BUFFER, False, NO_DATA)
+        # players[player_id].getPlayerCon().sendall(sendDataUnlock)
+        # players[(player_id + 1) % 2].getPlayerCon().sendall(sendDataLock)
         
         # Tell players its your turn
         print('Player Sending Turn flags', player_id)

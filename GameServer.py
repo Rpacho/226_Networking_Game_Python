@@ -8,6 +8,8 @@ import logging
 import logging.handlers
 import GetBuff
 import TreasureLocation
+from GameServerGui import serverGui
+import curses
 logger = logging.getLogger('GameServer.py')
 logger.setLevel(logging.DEBUG)
 handle = logging.FileHandler('Serverlog.txt')
@@ -95,17 +97,18 @@ def update(con, player_id):
         try:
             locks[player_id].acquire()  #### LOCK #####
             # Tell players its your turn
-            print('Player Sending Turn flags', player_id)
+            #print('Player Sending Turn flags', player_id)
             sendData = packData(FLAG_PLAYER_TURNS, NO_DATA, NO_DATA)
             players[player_id].getPlayerCon().sendall(sendData)
 
-            print('Player asking for data')
+            #print('Player asking for data')
             data = GetBuff.getbuf(con, 3)
             if data[0] == FLAG_POSITION:
                 players[player_id].setPlayerPosY(data[1])
                 players[player_id].setPlayerPosX(data[2])
+                serverDisplay.updatePosition(players[0].getPlayerPosY(), players[0].getPlayerPosX(), players[1].getPlayerPosY(), players[1].getPlayerPosX())
             # Send your turn to other players
-            print('Player sending position to all')
+            #print('Player sending position to all')
             sendPosition()
 
             locks[(player_id + 1) % 2].release()    #### RELEASE ####
@@ -123,13 +126,18 @@ def startTheGame():
     sendPlayer1ID = packData(FLAG_PLAYER2_CREATE, players[0].getPlayerID(), NO_DATA)
     players[1].getPlayerCon().sendall(sendPlayer1ID)
     sendPosition()
+    # Create a GUI for the server
+    global serverDisplay
+    serverDisplay = serverGui(players[0].getPlayerPosY(), players[0].getPlayerPosX(), players[1].getPlayerPosY(), players[1].getPlayerPosX(), row, col)
     # Send the treasure location for both player
-    TreasureLocation.sendLocation(players[0].getPlayerCon(), players[1].getPlayerCon())
+    TreasureLocation.sendLocation(players[0].getPlayerCon(), players[1].getPlayerCon(), serverDisplay)
 
     # Start Moving!!
     for i in range(2):
         threading.Thread(target=update, args=(players[i].getPlayerCon(), players[i].getPlayerID())).start()
     locks[0].release()
+
+    curses.wrapper(serverDisplay.main)
 
 while True:
     con, socketname = connect.accept()

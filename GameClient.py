@@ -20,6 +20,8 @@ NO_DATA = 0
 player_id = 0
 players = []
 numPlayers = 0
+treasurePosY = []
+treasurePosX = []
 # data Transmitting protocol
 FLAG_SPAWN_POINT = 0b0001
 FLAG_POSITION = 0b0011
@@ -63,8 +65,34 @@ def movePosition(net, stdscr, posY, posX, player):
         print("Error: movePosition Function GameClient Not Sending Data")
 
     return
+def treasureCollosion(posX, posY):
+    
+    for i in range (len(treasurePosY)):
+        if posY == treasurePosY[i]:
+            if posX == treasurePosX[i]:
+                return True
+
+def checkCollosion(posY, posX):
+    player2PosY = players[1].getPlayerPosY()
+    player2PosX = players[1].getPlayerPosX()
+    # Collosion on the wall
+    if posY < 0:    # end first of row
+        return False
+    if posY > 9:    # end last of row
+        return False
+    if posX < 0:    # end first of col
+        return False
+    if posX > 38:   # end last of col
+        return False
+    # Collosion on the Treasure
+    if (treasureCollosion(posX, posY) == True):
+        return False
+    # Collosion on the other player
+    if((posY == player2PosY and posX == player2PosX)):
+        return False
+
     # For this player
-def controller(stdscr, net, myTurn):
+def controller(stdscr, net):
     
     stdscr.addstr(0 , 60, "Your Turn         ")
     posY = players[0].getPlayerPosY()
@@ -72,32 +100,39 @@ def controller(stdscr, net, myTurn):
     key = stdscr.getch()
     logger.debug("Pressed Keys" + str(players[0].getPlayerID()))
     if key == curses.KEY_UP:
-        reDrawMyPreviousLocation(stdscr, players[0])
         playerPosY = posY - 1
+        # Checking the collosion
+        if(checkCollosion(playerPosY, posX) == False):
+            return False
+        reDrawMyPreviousLocation(stdscr, players[0])
         movePosition(net, stdscr, playerPosY, posX, players[0])
         return True
     elif key == curses.KEY_DOWN:
-        reDrawMyPreviousLocation(stdscr, players[0])
         playerPosY = posY + 1
+        if(checkCollosion(playerPosY, posX) == False):
+            return False
+        reDrawMyPreviousLocation(stdscr, players[0])
         movePosition(net, stdscr, playerPosY, posX, players[0])
         return True
     elif key == curses.KEY_LEFT:
-        reDrawMyPreviousLocation(stdscr, players[0])
         playerPosX = posX - 2
+        if(checkCollosion(posY, playerPosX) == False):
+            return False
+        reDrawMyPreviousLocation(stdscr, players[0])
         movePosition(net, stdscr, posY, playerPosX, players[0])
         return True
     elif key == curses.KEY_RIGHT:
-        reDrawMyPreviousLocation(stdscr, players[0])
         playerPosX = posX + 2
+        if(checkCollosion(posY, playerPosX) == False):
+            return False
+        reDrawMyPreviousLocation(stdscr, players[0])
         movePosition(net, stdscr, posY, playerPosX, players[0])
         return True
     else:
-        stdscr.addstr(1, 60, "Invalid input         ")
+        stdscr.addstr(0, 60, "Invalid input    ")
         stdscr.refresh()
     return False
-    # elif key == curses.KEY_ENTER:
-    #     exit()
-    #     #stdscr.refresh()
+
 ######### MAIN #########
 # Initiate prepack Curses and start the game
 def main(stdscr):
@@ -125,16 +160,21 @@ def main(stdscr):
         # If other players are connected and we receive thier data, store them in our players collection
             if data[0] == FLAG_PLAYER2_CREATE:
                 player2 = createPlayer(data[1], NO_DATA, NO_DATA)
+            if data[0] == FLAG_BOARD_TREASURE:
+                stdscr.addstr(data[1], data[2], '$')
+                treasurePosY.append(data[1])
+                treasurePosX.append(data[2])
+                stdscr.refresh()
             if data[0] == FLAG_PLAYER2_POSITION:
                 reDrawMyPreviousLocation(stdscr, players[1])
                 setPositionPlayer2(players[1], data[1], data[2])    # Index 1 will always be player 2
                 updatePosition(stdscr, players[0]) # Temporary fix
                 updatePosition(stdscr, players[1])
+            stdscr.addstr(1, 60, "           ")
             if data[0] == FLAG_PLAYER_TURNS:
                 while True:
-                    validInput = controller(stdscr, net, myTurn)
+                    validInput = controller(stdscr, net)
                     if(validInput == True):
-                        stdscr.addstr(1, 60, "                ")
                         break
                     
 

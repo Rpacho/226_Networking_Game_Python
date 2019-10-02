@@ -1,5 +1,4 @@
 #!/usr/bin/python3
-
 import socket
 import threading
 import DrawGui
@@ -8,6 +7,7 @@ from GameManager import GamePlayerManager
 import logging
 import logging.handlers
 import GetBuff
+import TreasureLocation
 logger = logging.getLogger('GameServer.py')
 logger.setLevel(logging.DEBUG)
 handle = logging.FileHandler('Serverlog.txt')
@@ -22,8 +22,6 @@ spawnPoint_1 = [0,0]
 spawnPoint_2 = [9,38]
 countAllPlayerTurn = 0
 players = []
-
-
 #Flag for transmiting data
 FLAG_SPAWN_POINT = 0b0001
 FLAG_POSITION = 0b0011
@@ -39,6 +37,8 @@ NO_DATA = 0
 TYPE = '!Bbb'
 connect = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+row = 10
+col = 20
 # Connect to the network
 try:
     connect.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -47,9 +47,6 @@ try:
     print("Connection connected. Server is up!")
 except:
     print("Cannnot establish connection. Server Down!")
-
-row = 10
-col = 20
 
 def getSpawnPoint():
     if playerID == 0:
@@ -94,31 +91,29 @@ def sendPosition():
 
 def update(con, player_id):
     # Put here outside the loop and lock
-
     while True:
+        try:
+            locks[player_id].acquire()  #### LOCK #####
+            # Tell players its your turn
+            print('Player Sending Turn flags', player_id)
+            sendData = packData(FLAG_PLAYER_TURNS, NO_DATA, NO_DATA)
+            players[player_id].getPlayerCon().sendall(sendData)
 
-        locks[player_id].acquire()  #### LOCK #####
-        # Send a signal to unlock your keypad
-        # sendDataUnlock = packData(FLAG_CLEAR_BUFFER, True, NO_DATA)
-        # sendDataLock = packData(FLAG_CLEAR_BUFFER, False, NO_DATA)
-        # players[player_id].getPlayerCon().sendall(sendDataUnlock)
-        # players[(player_id + 1) % 2].getPlayerCon().sendall(sendDataLock)
-        
-        # Tell players its your turn
-        print('Player Sending Turn flags', player_id)
-        sendData = packData(FLAG_PLAYER_TURNS, NO_DATA, NO_DATA)
-        players[player_id].getPlayerCon().sendall(sendData)
+            print('Player asking for data')
+            data = GetBuff.getbuf(con, 3)
+            if data[0] == FLAG_POSITION:
+                players[player_id].setPlayerPosY(data[1])
+                players[player_id].setPlayerPosX(data[2])
+            # Send your turn to other players
+            print('Player sending position to all')
+            sendPosition()
 
-        print('Player asking for data')
-        data = GetBuff.getbuf(con, 3)
-        if data[0] == FLAG_POSITION:
-            players[player_id].setPlayerPosY(data[1])
-            players[player_id].setPlayerPosX(data[2])
-        # Send your turn to other players
-        print('Player sending position to all')
-        sendPosition()
-
-        locks[(player_id + 1) % 2].release()    #### RELEASE ####
+            locks[(player_id + 1) % 2].release()    #### RELEASE ####
+        except Exception as e:
+            print(e)
+            break
+    print("Connection lost Player ", player_id)
+    players[player_id].getPlayerCon().close()
 
 def startTheGame():
     # Sending player2 id to player 1
@@ -128,8 +123,10 @@ def startTheGame():
     sendPlayer1ID = packData(FLAG_PLAYER2_CREATE, players[0].getPlayerID(), NO_DATA)
     players[1].getPlayerCon().sendall(sendPlayer1ID)
     sendPosition()
+    # Send the treasure location for both player
+    TreasureLocation.sendLocation(players[0].getPlayerCon(), players[1].getPlayerCon())
 
-    # Real Game start!!
+    # Start Moving!!
     for i in range(2):
         threading.Thread(target=update, args=(players[i].getPlayerCon(), players[i].getPlayerID())).start()
     locks[0].release()

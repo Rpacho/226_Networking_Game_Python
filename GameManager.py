@@ -6,8 +6,8 @@ class GamePlayerManager():
     # int playerID - the unique id of the player
     # int startPosY, int startPosX - the starting Y and X position of the player
     def __init__(self, playerID, startPosY, startPosX, sock):
-        self.playerIcon = self.setPlayerIcon(playerID)
-        self.playerUID = playerID   # Don't put setter function on this
+        self.playerUID = playerID  # Don't put setter function on this
+        self.playerIcon = self.setPlayerIcon(playerID)  
         self.playerPosY = startPosY
         self.playerPosX = startPosX
         self.con = sock

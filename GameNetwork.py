@@ -9,7 +9,7 @@ class Network():
     def __init__(self):
         self.con = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         #self.SERVER_IP = '10.51.11.59'
-        self.SERVER_IP = '127.0.0.1'
+        self.SERVER_IP = '10.51.11.59'
         self.SERVER_PORT = 12345
         self.addr = (self.SERVER_IP, self.SERVER_PORT)
         self.StartToConnect(self.addr)

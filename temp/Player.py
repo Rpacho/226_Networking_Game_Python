@@ -3,7 +3,9 @@
 
 class MakePlayer:
 
-    # Player Constructor 
+
+
+    # MakePlayer Constructor.
     # param 1 is player unique identification
     # param 2 current y position of the player
     # param 3 current x position of the player

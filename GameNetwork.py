@@ -6,15 +6,25 @@ import GetBuff  # Testing library for lab 1 need to delete later before handing 
 
 # This Class is for creating a network that connect to the server
 class Network():
+
+    # NetWork Constructor 
     def __init__(self):
         self.con = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.SERVER_IP = '192.168.44.128'
         #self.SERVER_IP = '10.51.11.59'
-        self.SERVER_IP = '10.51.11.59'
         self.SERVER_PORT = 12345
         self.addr = (self.SERVER_IP, self.SERVER_PORT)
         self.StartToConnect(self.addr)
 
+
     def StartToConnect(self, addr):
+    """
+    Establish the connection between server and client.
+    @type self: object
+    @param self: pass the constructor of NetWork class
+    @type addr: str
+    @param addr: pass the address of IP
+    """
         try:
             self.con.connect(addr)
             # data = self.con.recv(1024)
@@ -23,7 +33,21 @@ class Network():
             print(e)
             pass
     
+
     def sendData(self, flag, dataY, dataX):
+    """
+    Establish the connection between server and client.
+    @type self: object
+    @param self: pass the constructor of NetWork class
+    @type flag: int
+    @param flag: position of flag
+    @type dataY: int
+    @param dataY: position of Y
+    @type dataX: int
+    @param dataX: position of X
+    @rtype: int
+    @returns: sent data of flags, X and Y data
+    """
         try:
             data = struct.pack('!Bbb', flag, dataY, dataX)
             self.con.sendall((data))

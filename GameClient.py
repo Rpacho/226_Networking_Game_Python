@@ -10,10 +10,10 @@ from GameManager import GamePlayerManager
 import logging
 import logging.handlers
 import GetBuff
-logger = logging.getLogger('GameClient.py')
-logger.setLevel(logging.DEBUG)
-handle = logging.FileHandler('Clientlog.txt')
-logger.addHandler(handle)
+logger = logging.getLogger('GameClient.py') # Create a GameClient.py logger
+logger.setLevel(logging.DEBUG) # Create debug handler
+handle = logging.FileHandler('Clientlog.txt') # Create file handler
+logger.addHandler(handle) # add handler to the logger
 NO_DATA = 0
 
 # Game config
@@ -34,28 +34,69 @@ FLAG_PLAYER2_CREATE = 0b0110
 FLAG_PLAYER_TURNS = 0b1001
 FLAG_DONE_TURNS = 0b1000
 
-# This function is to update the position
+
 def updatePosition(stdscr, player):
+    """
+    Update the position.
+    @type stdscr: object
+    @param stdscr: cursers
+    @type player: object
+    @param player: passing player object to get the players' position
+    """   
     stdscr.addstr(player.getPlayerPosY(), player.getPlayerPosX(), player.getPlayerIcon())
     stdscr.refresh()
 
 # This function is to create the new player
 def createPlayer(playerID, posY, posX):
+    """
+    Create player in a designated location.
+    @type playerID: list
+    @param playerID: the value of the player
+    @type posY: int
+    @param posY: one of the location of rows
+    @type posX: int
+    @param posX: one of the location of cols
+    """ 
     players.append(GamePlayerManager(playerID, posY, posX, NO_DATA))
 
 # This function is update the other player position
 # @param player2 - player object
 def setPositionPlayer2(player2, posY, posX):
+    """
+    Set player2 in a designated location.
+    @type player2: object
+    @param player2: passing player2 object to set it's location
+    @type posY: int
+    @param posY: one of the location of rows
+    @type posX: int
+    @param posX: one of the location of cols
+    """ 
     player2.setPlayerPosY(posY)
     player2.setPlayerPosX(posX)
 
 def reDrawMyPreviousLocation(stdscr, player_id):
-    posY = player_id.getPlayerPosY()
+    """
+    Overwrite "_" to the previous locaiton of the player.
+    @type stdscr: object
+    @param stdscr: cursers
+    @type player_id: object
+    @param player_id: passing player_id object to get the position of the player
+    """ 
+    posY = player_id.getPlayerPosY()Packing flags' data into string.
     posX = player_id.getPlayerPosX()
     stdscr.addstr(posY, posX, "_")
 
 #This function is to receive the position of the
 def movePosition(net, stdscr, posY, posX, player):
+    """
+    Receive the locaiton of the player's moved.
+    @type posY: int
+    @param posY: location of cols
+    @type posX: int
+    @param posX: location of cols
+    @type player: object
+    @param player: passing player object to set the location of the player
+    """ 
     try:
         player.setPlayerPosY(posY)
         player.setPlayerPosX(posX)
@@ -66,13 +107,30 @@ def movePosition(net, stdscr, posY, posX, player):
 
     return
 def treasureCollosion(posX, posY):
-    
+    """
+    Prevent the collapse of treasure position. 
+    @type posX: int
+    @param posX: location of rows
+    @type posY: int
+    @param posY: location of cols
+    @rtype: bool
+    @returns: true
+    """ 
     for i in range (len(treasurePosY)):
         if posY == treasurePosY[i]:
             if posX == treasurePosX[i]:
                 return True
 
 def checkCollosion(posY, posX):
+    """
+    Check between a treasure location and a player's location.
+    @type posY: int
+    @param posY: location of cols
+    @type posX: int
+    @param posX: location of rows
+    @rtype: bool
+    @returns: false
+    """ 
     player2PosY = players[1].getPlayerPosY()
     player2PosX = players[1].getPlayerPosX()
     # Collosion on the wall
@@ -93,7 +151,15 @@ def checkCollosion(posY, posX):
 
     # For this player
 def controller(stdscr, net):
-    
+    """
+    Control handling for a player.
+    @type stdscr: object 
+    @param stdscr: cursers object
+    @type net: object
+    @param net: network object
+    @rtype: bool
+    @returns: true or false depends on key is typed or not
+    """ 
     stdscr.addstr(0 , 60, "Your Turn         ")
     posY = players[0].getPlayerPosY()
     posX = players[0].getPlayerPosX()
@@ -136,6 +202,10 @@ def controller(stdscr, net):
 ######### MAIN #########
 # Initiate prepack Curses and start the game
 def main(stdscr):
+    """
+    Receive data of board size, spawn position of the player,
+    screen display and other player.
+    """
     net = Network()
     curses.curs_set(0)
     playerUID = net.sendData(FLAG_CREATE_PLAYER, NO_DATA, NO_DATA)

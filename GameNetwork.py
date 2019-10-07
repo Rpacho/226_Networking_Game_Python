@@ -20,8 +20,6 @@ class Network():
     def StartToConnect(self, addr):
     """
     Establish the connection between server and client.
-    @type self: object
-    @param self: pass the constructor of NetWork class
     @type addr: str
     @param addr: pass the address of IP
     """
@@ -37,8 +35,6 @@ class Network():
     def sendData(self, flag, dataY, dataX):
     """
     Establish the connection between server and client.
-    @type self: object
-    @param self: pass the constructor of NetWork class
     @type flag: int
     @param flag: position of flag
     @type dataY: int

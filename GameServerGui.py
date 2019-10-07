@@ -27,8 +27,6 @@ class serverGui():
     def updatePosition(self, p1PosY, p1PosX2, p2PosY, p2PosX):
     """
     Update position of X and Y.
-    @type self: object
-    @param self: passing serverGui constructor
     @type p1PosY: int
     @param p1PosY: update posistion of Y in player 1
     @type p1PosX2: int 
@@ -47,8 +45,6 @@ class serverGui():
     def storePrevLocation(self):
     """
     Store previous location of X and Y.
-    @type self: object
-    @param self: passing serverGui constructor
     """
         self.prevPlayer1PosY = self.player1PosY
         self.prevPlayer1PosX = self.player1PosX
@@ -58,8 +54,6 @@ class serverGui():
     def addTreasure(self, posY, posX):
     """
     Refer treasure location in both player 1 and player 2.
-    @type self: object
-    @param self: passing serverGui constructor
     @type posY: int
     @param posY: treasure posision in player 1
     @type posX: int
@@ -68,14 +62,13 @@ class serverGui():
         self.treasurePosY.append(posY)
         self.treasurePosX.append(posX)
 
+
+    def main(self, stdscr):
     """
     Keep refreshing board when coordination of X or Y is updated.
-    @type self: object
-    @param self: passing serverGui constructor
     @type stdscr: object
     @param stdscr: update and refresh of the board
     """
-    def main(self, stdscr):
         DrawGui.DrawBoard(self.rowSize, self.colSize, stdscr)
         for i in range(len(self.treasurePosX)):
             stdscr.addstr(self.treasurePosY[i], self.treasurePosX[i], "$")

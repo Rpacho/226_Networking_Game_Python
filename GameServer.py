@@ -10,10 +10,10 @@ import GetBuff
 import TreasureLocation
 from GameServerGui import serverGui
 import curses
-logger = logging.getLogger('GameServer.py')
-logger.setLevel(logging.DEBUG)
-handle = logging.FileHandler('Serverlog.txt')
-logger.addHandler(handle)
+logger = logging.getLogger('GameServer.py') # Create a GameClient.py logger
+logger.setLevel(logging.DEBUG) # Create debug handler
+handle = logging.FileHandler('Serverlog.txt') # Create file handler
+logger.addHandler(handle) # add handler to the logger
 
 HOST_IP = ''
 PORT = 12345
@@ -51,12 +51,28 @@ except:
     print("Cannnot establish connection. Server Down!")
 
 def getSpawnPoint():
+    """
+    Get the initial point of X and Y players.
+    @rtype: int
+    @returns: initial point of a player
+    """
     if playerID == 0:
         return spawnPoint_1
     if playerID == 1:
         return spawnPoint_2
 
 def packData(flag, data1, data2):
+    """
+    Paking flags' data into string.
+    @type flag: int
+    @param flag: the value of flag
+    @type data1: int
+    @param data1: the value of data1
+    @type data2: int
+    @parma data2: the value of data2
+    @rtype str
+    @returns: flag data of string
+    """
     return struct.pack('!Bbb', flag, data1, data2)
 
 # Semaphores
@@ -66,6 +82,15 @@ for i in range(2):
     locks[-1].acquire()
 
 def setUpTheGame(con, player_id):
+    """
+    Send essential flags to set up games.
+    @type con: object
+    @param con: socket
+    @type player_id: int
+    @param player_id: created player
+    @rtype bool
+    @returns: infinite operating
+    """
     while True:
         data = GetBuff.getbuf(con, 3)
         if data[0] == FLAG_CREATE_PLAYER:
@@ -84,6 +109,9 @@ def setUpTheGame(con, player_id):
             return True
 
 def sendPosition():
+    """
+    Send one player's position to another.
+    """
     # Sending player2 position to player 1
     sendPlayer2Pos = packData(FLAG_PLAYER2_POSITION, players[1].getPlayerPosY(), players[1].getPlayerPosX())
     players[0].getPlayerCon().sendall(sendPlayer2Pos)
@@ -92,6 +120,13 @@ def sendPosition():
     players[1].getPlayerCon().sendall(sendPlayer1Pos)
 
 def update(con, player_id):
+    """
+    Wait until another player assign the curser value.
+    @type con: object
+    @param con: socket
+    @type player_id: int
+    @param player_id: the unique value of a player
+    """
     # Put here outside the loop and lock
     while True:
         try:
@@ -119,6 +154,10 @@ def update(con, player_id):
     players[player_id].getPlayerCon().close()
 
 def startTheGame():
+    """
+    Sending player data itself each other, Create GUI for the server,
+    send the treasure info for both players, and make players be able to move.
+    """
     # Sending player2 id to player 1
     sendPlayer2ID = packData(FLAG_PLAYER2_CREATE, players[1].getPlayerID(), NO_DATA)
     players[0].getPlayerCon().sendall(sendPlayer2ID)

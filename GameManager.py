@@ -18,8 +18,6 @@ class GamePlayerManager():
     def setPlayerIcon(self, id):
     """
     Set player's identity.
-    @type self: object
-    @param self: GamePlayerManager constructor
     @type id: int
     @param id: set the unique id of the player
     @rtype: str
@@ -36,8 +34,6 @@ class GamePlayerManager():
     def setPlayerPosY(self, posY):
     """
     Set Y player's initial position.
-    @type self: object
-    @param self: GamePlayerManager constructor
     @type posY: int
     @param posY: setting the value of playerPosY to PosY
     """
@@ -46,8 +42,6 @@ class GamePlayerManager():
     def setPlayerPosX(self, posX):
     """
     Set X player's initial position.
-    @type self: object
-    @param self: GamePlayerManager constructor
     @type posX: int
     @param posX: setting the value of playerPosX to PosX
     """
@@ -58,8 +52,6 @@ class GamePlayerManager():
     def getPlayerPosY(self):
     """
     Get the current Y position of the player.
-    @type self: object
-    @param self: GamePlayerManager constructor
     @rtype: int
     @returns: the current Y position of the player
     """
@@ -68,8 +60,6 @@ class GamePlayerManager():
     def getPlayerPosX(self):
     """
     Get the current X position of the player.
-    @type self: object
-    @param self: GamePlayerManager constructor
     @rtype: int
     @returns: the current X position of the player
     """
@@ -78,8 +68,6 @@ class GamePlayerManager():
     def getPlayerID(self):
     """
     get this player id
-    @type self: object
-    @param self: GamePlayerManager constructor
     @rtype: int
     @returns: this player id
     """
@@ -88,8 +76,6 @@ class GamePlayerManager():
     def getPlayerIcon(self):
     """
     Get this player icon.
-    @type self: object
-    @param self: GamePlayerManager constructor
     @rtype: int
     @returns: this player id
     """
@@ -98,8 +84,6 @@ class GamePlayerManager():
     def getPlayerCon(self):
     """
     Get this player's socket.
-    @type self: object
-    @param self: GamePlayerManager constructor
     @rtype: object
     @returns: this player's socket
     """
